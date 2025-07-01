@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>手繪進行GUI設計</title>
+  <style>
+      body {
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif, 'Microsoft JhengHei', 'PingFang TC';
+          display: flex;
+          justify-content: center;
+          align-items: flex-start;
+          padding: 20px;
+          background-color: #f4f4f4;
+      }
+      .container {
+          display: flex;
+          flex-wrap: wrap; /* Allow wrapping on smaller screens */
+          gap: 40px;
+          max-width: 1200px;
+          width: 100%;
+      }
+      .instructions {
+          flex: 1;
+          min-width: 300px; /* Minimum width for the text section */
+          font-size: 1.2rem;
+      }
+      .instructions ul {
+          list-style-type: none;
+          padding-left: 20px;
+      }
+      .instructions li {
+          margin-bottom: 15px;
+      }
+      .viewer {
+          flex: 1;
+          min-width: 300px; /* Minimum width for the viewer */
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+      }
+      .image-container {
+          width: 100%;
+          max-width: 450px;
+          height: 300px;
+          border: 1px solid #ccc;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          margin-bottom: 15px;
+          background-color: #fff;
+          overflow: hidden;
+      }
+      #image-display {
+          max-width: 100%;
+          max-height: 100%;
+          object-fit: contain;
+      }
+      .controls {
+          display: flex;
+          gap: 10px;
+      }
+      button {
+          padding: 10px 20px;
+          font-size: 1rem;
+          cursor: pointer;
+          border: 1px solid #ccc;
+          background-color: #f0f0f0;
+          border-radius: 4px;
+          transition: background-color 0.3s;
+      }
+      button:hover {
+          background-color: #e0e0e0;
+      }
+      button:disabled {
+          cursor: not-allowed;
+          opacity: 0.5;
+      }
+      #file-input {
+          display: none;
+      }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="instructions">
+    <h1>手繪進行GUI設計</h1>
+    <ul>
+      <li>• 同樣Layout圖片也可用於規劃動態網頁
+        <ul>
+          <li>– 將圖片上傳至GPT-4o</li>
+          <li>– 將輸出內容存成 test.html</li>
+          <li>– 完成後直接點選test.html，以chrome瀏覽器開啟</li>
+        </ul>
+      </li>
+    </ul>
+    <p>請依據以上圖片的 layout撰寫一個動態網頁，具有實際功能，讓我可以按下中間的按鈕就選擇要顯示圖片的目錄，按上一張按鈕就顯示上一張圖片，按下一張按鈕就顯示下一張圖片</p>
+  </div>
+
+  <div class="viewer">
+    <div class="image-container">
+      <img id="image-display" src="input_file_0.png" alt="請選取圖片目錄">
+    </div>
+    <div class="controls">
+      <button id="prev-btn" disabled>上一張</button>
+      <button id="select-btn">選取圖片所在目錄</button>
+      <button id="next-btn" disabled>下一張</button>
+      <input type="file" id="file-input" webkitdirectory directory multiple>
+    </div>
+  </div>
+</div>
+
+<script>
+    const selectBtn = document.getElementById('select-btn');
+    const fileInput = document.getElementById('file-input');
+    const imageDisplay = document.getElementById('image-display');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+
+    let imageFiles = [];
+    let currentImageIndex = 0;
+
+    // Trigger file input when select button is clicked
+    selectBtn.addEventListener('click', () => {
+        fileInput.click();
+    });
+
+    // Handle file selection
+    fileInput.addEventListener('change', (event) => {
+        const files = Array.from(event.target.files);
+        // Filter for common image types
+        imageFiles = files.filter(file => /\.(jpe?g|png|gif|bmp|webp|svg)$/i.test(file.name));
+
+        if (imageFiles.length > 0) {
+            currentImageIndex = 0;
+            displayImage();
+            updateButtonStates();
+        } else {
+            alert('在選取的目錄中找不到可辨識的圖片檔案。');
+            // Reset to initial state if no images found
+            imageDisplay.src = 'input_file_0.png';
+            imageFiles = [];
+            updateButtonStates();
+        }
+    });
+
+    // Display the current image
+    function displayImage() {
+        if (imageFiles.length > 0) {
+            const file = imageFiles[currentImageIndex];
+            // Revoke the previous object URL to free up memory
+            if (imageDisplay.src.startsWith('blob:')) {
+                URL.revokeObjectURL(imageDisplay.src);
+            }
+            imageDisplay.src = URL.createObjectURL(file);
+            imageDisplay.alt = file.name;
+        }
+    }
+
+    // Update the state of Previous/Next buttons
+    function updateButtonStates() {
+        // Buttons should be enabled only if there is more than one image
+        const hasMultipleImages = imageFiles.length > 1;
+        prevBtn.disabled = !hasMultipleImages;
+        nextBtn.disabled = !hasMultipleImages;
+    }
+
+    // Go to the next image
+    nextBtn.addEventListener('click', () => {
+        if (imageFiles.length > 0) {
+            currentImageIndex = (currentImageIndex + 1) % imageFiles.length;
+            displayImage();
+        }
+    });
+
+    // Go to the previous image
+    prevBtn.addEventListener('click', () => {
+        if (imageFiles.length > 0) {
+            currentImageIndex = (currentImageIndex - 1 + imageFiles.length) % imageFiles.length;
+            displayImage();
+        }
+    });
+
+</script>
+
+</body>
+</html>
