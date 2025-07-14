@@ -2,15 +2,16 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.math.BigInteger;
 
 /**
  * 一個比較遞迴與迴圈計算階乘效能的GUI應用程式。
  * * 功能：
  * 1. 提供圖形介面讓使用者輸入N值。
- * 2. 分別用遞迴(Recursive)和迴圈(Iterative)方法計算N!。
+ * 2. 分別用遞迴(Recursive)和疊代(Iterative)方法計算N!。
  * 3. 使用 System.nanoTime() 測量兩種方法的執行時間。
  * 4. 結果會附加顯示在文字區，不會覆蓋舊結果。
- * 5. 若計算結果超過 long 型別的最大值，會顯示溢位錯誤。
+ * 5. 【已解決】使用 BigInteger 處理大數運算，避免溢位問題。
  * 6. 提供清除按鈕來清空結果區。
  * 7. 結果區可隨視窗大小縮放，並在內容過多時提供捲動軸。
  */
@@ -24,8 +25,8 @@ public class FactorialComparison extends JFrame {
 
   public FactorialComparison() {
     // --- 1. 設定主視窗 (JFrame) ---
-    setTitle("階乘效能比較 (Factorial Performance Comparison)");
-    setSize(800, 600);
+    setTitle("階乘效能比較 (BigInteger 版本)");
+    setSize(600, 500); // 稍微加大視窗以容納大數字
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     setLocationRelativeTo(null); // 視窗置中
 
@@ -45,13 +46,14 @@ public class FactorialComparison extends JFrame {
     resultArea = new JTextArea();
     resultArea.setEditable(false); // 設定為不可編輯
     resultArea.setFont(new Font("Monospaced", Font.PLAIN, 14)); // 使用等寬字體，方便對齊
+    resultArea.setLineWrap(true); // 自動換行
+    resultArea.setWrapStyleWord(true); // 以單字為單位換行
     resultArea.setMargin(new Insets(10, 10, 10, 10)); // 設定邊界
 
-    // 將結果區放入可捲動面板中，這樣內容過多時才能捲動
+    // 將結果區放入可捲動面板中
     JScrollPane scrollPane = new JScrollPane(resultArea);
 
     // --- 3. 將元件加入主視窗 ---
-    // 使用 BorderLayout，讓輸入面板在上方，結果區在中間並可隨視窗縮放
     setLayout(new BorderLayout());
     add(inputPanel, BorderLayout.NORTH);
     add(scrollPane, BorderLayout.CENTER);
@@ -64,21 +66,8 @@ public class FactorialComparison extends JFrame {
    * 統一設定按鈕的事件處理邏輯
    */
   private void setupActionListeners() {
-    // "計算" 按鈕的動作
-    calculateButton.addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        calculateAndDisplay();
-      }
-    });
-
-    // "清除" 按鈕的動作
-    clearButton.addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        resultArea.setText(""); // 清空文字區
-      }
-    });
+    calculateButton.addActionListener(e -> calculateAndDisplay());
+    clearButton.addActionListener(e -> resultArea.setText(""));
   }
 
   /**
@@ -103,71 +92,76 @@ public class FactorialComparison extends JFrame {
     resultArea.append("N = " + n + "\n");
     resultArea.append("------------------------------------\n");
 
-    // --- 遞迴方法測試 ---
-    try {
-      long startTime = System.nanoTime();
-      long result = factorialRecursive(n);
-      long endTime = System.nanoTime();
-      long duration = endTime - startTime;
-      resultArea.append("遞迴 (Recursive) 結果: " + result + "\n");
-      resultArea.append("遞迴 (Recursive) 時間: " + duration + " ns\n");
-    } catch (ArithmeticException ex) {
-      resultArea.append("遞迴 (Recursive) 結果: 數字過大，計算溢位！\n");
-    } catch (StackOverflowError ex) {
+    // --- 遞迴方法平均時間測試 ---
+    long recursiveTotal = 0;
+    BigInteger recursiveResult = null;
+    boolean recursiveOverflow = false;
+    for (int i = 0; i < 20; i++) {
+      try {
+        long startTime = System.nanoTime();
+        recursiveResult = factorialRecursive(n);
+        long endTime = System.nanoTime();
+        recursiveTotal += (endTime - startTime);
+      } catch (StackOverflowError ex) {
+        recursiveOverflow = true;
+        break;
+      }
+    }
+    if (recursiveOverflow) {
       resultArea.append("遞迴 (Recursive) 結果: 堆疊溢位！N值太大導致遞迴太深。\n");
+    } else {
+      long recursiveAvg = recursiveTotal / 20;
+//      resultArea.append("遞迴 (Recursive) 結果: " + recursiveResult.toString() + "\n");
+      resultArea.append("遞迴 (Recursive) 平均時間: " + recursiveAvg + " ns (20次)\n");
     }
 
-
-    // --- 迴圈方法測試 ---
-    try {
+    // --- 疊代方法平均時間測試 ---
+    long iterativeTotal = 0;
+    BigInteger iterativeResult = null;
+    for (int i = 0; i < 20; i++) {
       long startTime = System.nanoTime();
-      long result = factorialIterative(n);
+      iterativeResult = factorialIterative(n);
       long endTime = System.nanoTime();
-      long duration = endTime - startTime;
-      resultArea.append("迴圈 (Iterative) 結果: " + result + "\n");
-      resultArea.append("迴圈 (Iterative) 時間: " + duration + " ns\n");
-    } catch (ArithmeticException ex) {
-      resultArea.append("迴圈 (Iterative) 結果: 數字過大，計算溢位！\n");
+      iterativeTotal += (endTime - startTime);
     }
+    long iterativeAvg = iterativeTotal / 20;
+//    resultArea.append("疊代 (Iterative) 結果: " + iterativeResult.toString() + "\n");
+    resultArea.append("疊代 (Iterative) 平均時間: " + iterativeAvg + " ns (20次)\n");
 
     resultArea.append("------------------------------------\n\n");
-    // 自動捲動到最下方
     resultArea.setCaretPosition(resultArea.getDocument().getLength());
   }
 
   /**
-   * 使用遞迴計算階乘
+   * 使用遞迴計算階乘 (BigInteger 版本)
    * @param n 非負整數
-   * @return n! 的結果
-   * @throws ArithmeticException 如果計算過程中發生溢位
+   * @return n! 的結果 (BigInteger)
    * @throws StackOverflowError 如果 n 太大導致遞迴深度超過限制
    */
-  private long factorialRecursive(long n) {
+  private BigInteger factorialRecursive(long n) {
     if (n < 0) {
       throw new IllegalArgumentException("階乘的輸入不能是負數");
     }
     if (n <= 1) {
-      return 1; // 基底情況 (Base Case)
+      return BigInteger.ONE; // 基底情況，回傳 BigInteger 的 1
     }
-    // 遞迴步驟 (Recursive Step)
-    // 使用 Math.multiplyExact 會在溢位時拋出 ArithmeticException
-    return Math.multiplyExact(n, factorialRecursive(n - 1));
+    // 遞迴步驟，使用 BigInteger 的 multiply 方法
+    return BigInteger.valueOf(n).multiply(factorialRecursive(n - 1));
   }
 
   /**
-   * 使用迴圈 (疊代) 計算階乘
+   * 使用迴圈 (疊代) 計算階乘 (BigInteger 版本)
    * @param n 非負整數
-   * @return n! 的結果
-   * @throws ArithmeticException 如果計算過程中發生溢位
+   * @return n! 的結果 (BigInteger)
    */
-  private long factorialIterative(long n) {
+  private BigInteger factorialIterative(long n) {
     if (n < 0) {
       throw new IllegalArgumentException("階乘的輸入不能是負數");
     }
-    long result = 1;
+    BigInteger result = BigInteger.ONE; // 初始值為 BigInteger 的 1
     for (long i = 2; i <= n; i++) {
-      // 使用 Math.multiplyExact 會在溢位時拋出 ArithmeticException
-      result = Math.multiplyExact(result, i);
+      // 使用 BigInteger 的 multiply 方法
+      result = result.multiply(BigInteger.valueOf(i));
     }
     return result;
   }
@@ -176,12 +170,6 @@ public class FactorialComparison extends JFrame {
    * 程式進入點 (Main)
    */
   public static void main(String[] args) {
-    // 為了確保 GUI 在事件分派執行緒(EDT)上建立，這是 Swing 的標準做法
-    SwingUtilities.invokeLater(new Runnable() {
-      @Override
-      public void run() {
-        new FactorialComparison().setVisible(true);
-      }
-    });
+    SwingUtilities.invokeLater(() -> new FactorialComparison().setVisible(true));
   }
 }
