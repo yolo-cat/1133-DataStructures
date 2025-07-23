@@ -193,11 +193,11 @@ public class Mp3PlayerDemo extends Application {
           Files.copy(selectedFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
           String newPath = destFile.getAbsolutePath();
           musicLibrary.add(newPath);
-          if (showPlaylist) {
-            playlist.add(newPath);
-            currentIndex = playlist.size() - 1;
-          }
+          // 新增檔案時，無論目前顯示哪個模式都加入播放清單
+          playlist.add(newPath);
+          currentIndex = playlist.size() - 1;
           updateNames();
+          updateListView();
           listView.getSelectionModel().select(currentIndex);
         } catch (Exception ex) {
           ex.printStackTrace();
