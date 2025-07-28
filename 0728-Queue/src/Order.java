@@ -9,9 +9,9 @@ public class Order {
     
     // 餐點類型枚舉
     public enum FoodType {
-        BURGER("漢堡", 2000),    // 2秒
-        FRIES("薯條", 1000),     // 1秒  
-        DRINK("飲料", 500);      // 0.5秒
+        BURGER("漢堡", 4000),    // 4秒
+        FRIES("薯條", 2000),     // 2秒
+        DRINK("飲料", 1000);      // 1秒
         
         private final String name;
         private final int preparationTime; // 毫秒
