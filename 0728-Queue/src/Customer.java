@@ -22,7 +22,7 @@ public class Customer {
     }
     
     private int generateRandomTableNumber() {
-        return random.nextInt(20) + 1; // 桌號 1-20
+        return random.nextInt(5) + 1; // 桌號 1-5
     }
     
     private Order generateRandomOrder() {
