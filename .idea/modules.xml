@@ -7,6 +7,7 @@
       <module fileurl="file://$PROJECT_DIR$/0714-PerformanceAnalysis/0714-PerformanceAnalysis.iml" filepath="$PROJECT_DIR$/0714-PerformanceAnalysis/0714-PerformanceAnalysis.iml" />
       <module fileurl="file://$PROJECT_DIR$/0715-Array/0715-Array.iml" filepath="$PROJECT_DIR$/0715-Array/0715-Array.iml" />
       <module fileurl="file://$PROJECT_DIR$/0723-LinkedList/0723-LinkedList.iml" filepath="$PROJECT_DIR$/0723-LinkedList/0723-LinkedList.iml" />
+      <module fileurl="file://$PROJECT_DIR$/0728-Queue/0728-Queue.iml" filepath="$PROJECT_DIR$/0728-Queue/0728-Queue.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/1133-DataStructures.iml" filepath="$PROJECT_DIR$/.idea/1133-DataStructures.iml" />
     </modules>
   </component>
