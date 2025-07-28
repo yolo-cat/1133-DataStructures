@@ -24,16 +24,8 @@ public class Customer {
     // 新增：分配座位與產生訂單
     public void assignTableAndOrder(int tableNumber, Order.FoodType foodType) {
         this.tableNumber = tableNumber;
-        // 產生訂單
-        Order order = new Order(foodType, tableNumber);
-        // 反射設置order欄位（或改為getter動態產生）
-        try {
-            java.lang.reflect.Field f = Customer.class.getDeclaredField("order");
-            f.setAccessible(true);
-            f.set(this, order);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        // 產生訂單 - 直接賦值，不使用反射
+        this.order = new Order(foodType, tableNumber);
     }
     
     // Getter methods

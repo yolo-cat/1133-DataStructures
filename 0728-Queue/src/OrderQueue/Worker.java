@@ -22,11 +22,6 @@ public class Worker implements Runnable {
         
         while (running && !Thread.currentThread().isInterrupted()) {
             try {
-                // 新增：等待有空桌才取出訂單
-                while (running && !restaurantQueue.hasAvailableTable()) {
-                    if (gui != null) gui.updateWorkerStatus(workerId, "等待空桌...");
-                    Thread.sleep(300); // 每300ms檢查一次
-                }
                 // 從佇列取出訂單
                 Order order = restaurantQueue.takeOrder();
                 currentOrder = order;
@@ -41,18 +36,14 @@ public class Worker implements Runnable {
                 // 模擬製作時間
                 Thread.sleep(order.getPreparationTime());
                 
-                // 訂單完成
+                // 訂單完成 - 佔用桌位開始用餐
                 System.out.println("工作人員 #" + workerId + " 完成製作: " + order);
 
-                // 新增：模擬顧客用餐佔用桌號
+                // 食物完成後，顧客開始用餐並佔用桌位
                 int diningTime = 5000 + new java.util.Random().nextInt(6000); // 5~10秒
                 restaurantQueue.occupyTable(order.getTableNumber(), diningTime);
                 System.out.println("桌號 " + order.getTableNumber() + " 用餐中，預計用餐 " + (diningTime/1000) + " 秒");
-                try {
-                    Thread.sleep(diningTime); // 模擬用餐
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
+                // 註: 不在此處等待用餐結束，讓廚師可以繼續處理下一個訂單
 
                 // 通知GUI訂單完成
                 if (gui != null) {
