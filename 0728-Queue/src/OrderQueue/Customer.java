@@ -11,24 +11,29 @@ public class Customer {
     
     private final int customerId;
     private final LocalDateTime arrivalTime;
-    private final int tableNumber;
-    private final Order order;
-    
+    private int tableNumber; // 改為非final，初始為-1
+    private Order order;
+
     public Customer() {
         this.customerId = customerCounter++;
         this.arrivalTime = LocalDateTime.now();
-        this.tableNumber = generateRandomTableNumber();
-        this.order = generateRandomOrder();
+        this.tableNumber = -1; // 尚未分配座位
+        this.order = null; // 訂單稍後產生
     }
     
-    private int generateRandomTableNumber() {
-        return random.nextInt(5) + 1; // 桌號 1-5
-    }
-    
-    private Order generateRandomOrder() {
-        Order.FoodType[] foods = Order.FoodType.values();
-        Order.FoodType randomFood = foods[random.nextInt(foods.length)];
-        return new Order(randomFood, tableNumber);
+    // 新增：分配座位與產生訂單
+    public void assignTableAndOrder(int tableNumber, Order.FoodType foodType) {
+        this.tableNumber = tableNumber;
+        // 產生訂單
+        Order order = new Order(foodType, tableNumber);
+        // 反射設置order欄位（或改為getter動態產生）
+        try {
+            java.lang.reflect.Field f = Customer.class.getDeclaredField("order");
+            f.setAccessible(true);
+            f.set(this, order);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
     
     // Getter methods
@@ -43,7 +48,7 @@ public class Customer {
     
     @Override
     public String toString() {
-        return String.format("顧客#%d (桌號:%d, 到達時間:%s)", 
-                customerId, tableNumber, getFormattedArrivalTime());
+        return String.format("顧客#%d (桌號:%s, 到達時間:%s)",
+                customerId, (tableNumber > 0 ? tableNumber : "無座位"), getFormattedArrivalTime());
     }
 }

@@ -21,7 +21,9 @@ public class RestaurantGUI extends JFrame {
     private JButton stopButton;
     private JLabel statusLabel;
     private JLabel statisticsLabel;
-    
+    private JPanel tableStatusPanel;
+    private static final int TABLE_COUNT = 5; // 假設有5桌
+
     // 資料和狀態
     private final RestaurantQueue restaurantQueue;
     private final CopyOnWriteArrayList<Customer> recentCustomers;
@@ -56,7 +58,8 @@ public class RestaurantGUI extends JFrame {
         createWorkerPanel();
         createCompletedPanel();
         createControlPanel();
-        
+        createTableStatusPanel(); // 新增座位狀態面板
+
         // 布局設計
         JPanel mainPanel = new JPanel(new GridLayout(2, 2, 10, 10));
         mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -66,8 +69,8 @@ public class RestaurantGUI extends JFrame {
         mainPanel.add(completedPanel);
         
         add(mainPanel, BorderLayout.CENTER);
-        add(createControlPanel(), BorderLayout.SOUTH);
-        
+        add(tableStatusPanel, BorderLayout.SOUTH); // 底部顯示座位狀態
+
         setLocationRelativeTo(null);
     }
     
@@ -129,9 +132,40 @@ public class RestaurantGUI extends JFrame {
         return controlPanel;
     }
     
+    private void createTableStatusPanel() {
+        tableStatusPanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                int w = getWidth();
+                int h = getHeight();
+                int tableSize = 50;
+                int gap = (w - TABLE_COUNT * tableSize) / (TABLE_COUNT + 1);
+                for (int i = 0; i < TABLE_COUNT; i++) {
+                    int x = gap + i * (tableSize + gap);
+                    int y = h / 2 - tableSize / 2;
+                    int tableNumber = i + 1;
+                    boolean occupied = restaurantQueue.isTableOccupied(tableNumber);
+                    g.setColor(occupied ? Color.RED : Color.GREEN);
+                    g.fillOval(x, y, tableSize, tableSize);
+                    g.setColor(Color.BLACK);
+                    g.drawOval(x, y, tableSize, tableSize);
+                    g.drawString("桌" + tableNumber, x + 10, y + tableSize / 2 + 5);
+                }
+            }
+        };
+        tableStatusPanel.setPreferredSize(new Dimension(WINDOW_WIDTH, 80));
+    }
+
     private void startGUIUpdateTimer() {
-        Timer updateTimer = new Timer(100, e -> updateGUI());
-        updateTimer.start();
+        Timer timer = new Timer(500, e -> {
+            updateStatistics();
+            updateQueueDisplay();
+            updateWorkerDisplay();
+            updateCompletedDisplay();
+            updateTableStatusPanel(); // 新增：刷新座位狀態
+        });
+        timer.start();
     }
     
     private void updateGUI() {
@@ -215,6 +249,10 @@ public class RestaurantGUI extends JFrame {
                 totalCustomers, totalOrdersCompleted, restaurantQueue.getQueueSize()));
     }
     
+    private void updateTableStatusPanel() {
+        tableStatusPanel.repaint();
+    }
+
     /**
      * 顧客進店動畫
      */

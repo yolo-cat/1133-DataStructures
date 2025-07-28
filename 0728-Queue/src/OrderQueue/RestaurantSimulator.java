@@ -17,6 +17,7 @@ public class RestaurantSimulator {
     private RestaurantGUI gui;
     private ScheduledExecutorService customerGenerator;
     private ExecutorService workerExecutor;
+    private ScheduledExecutorService tableReleaseScheduler;
     private Worker[] workers;
     private Thread[] workerThreads;
     private Random random;
@@ -44,7 +45,8 @@ public class RestaurantSimulator {
         // 初始化執行緒池
         customerGenerator = Executors.newSingleThreadScheduledExecutor();
         workerExecutor = Executors.newFixedThreadPool(NUM_WORKERS);
-        
+        tableReleaseScheduler = Executors.newSingleThreadScheduledExecutor();
+
         // 初始化工作人員
         workers = new Worker[NUM_WORKERS];
         workerThreads = new Thread[NUM_WORKERS];
@@ -74,6 +76,11 @@ public class RestaurantSimulator {
         // 啟動顧客生成器
         startCustomerGeneration();
         
+        // 啟動桌位釋放定時任務
+        tableReleaseScheduler.scheduleAtFixedRate(() -> {
+            restaurantQueue.releaseFinishedTables();
+        }, 1, 1, TimeUnit.SECONDS);
+
         System.out.println("系統啟動完成！");
         System.out.println("- 工作人員數量: " + NUM_WORKERS);
         System.out.println("- 顧客將隨機進店點餐");
@@ -98,15 +105,35 @@ public class RestaurantSimulator {
             try {
                 // 生成新顧客
                 Customer customer = new Customer();
-                
-                // 將訂單加入佇列
-                restaurantQueue.addOrder(customer.getOrder());
-                
+                boolean assigned = false;
+                int assignedTable = -1;
+                if (restaurantQueue.hasAvailableTable()) {
+                    // 分配空桌號
+                    for (int i = 1; i <= restaurantQueue.getMaxTableCount(); i++) {
+                        if (!restaurantQueue.isTableOccupied(i)) {
+                            assignedTable = i;
+                            break;
+                        }
+                    }
+                    if (assignedTable > 0) {
+                        // 隨機餐點
+                        Order.FoodType[] foods = Order.FoodType.values();
+                        Order.FoodType randomFood = foods[random.nextInt(foods.length)];
+                        customer.assignTableAndOrder(assignedTable, randomFood);
+                        assigned = true;
+                    }
+                }
+                // 將訂單加入佇列（僅有分配座位才加入）
+                if (assigned) {
+                    restaurantQueue.addOrder(customer.getOrder());
+                }
                 // 通知GUI顧客到達
                 gui.customerArrived(customer);
-                
-                System.out.println("新顧客到達: " + customer + " 點了 " + customer.getOrder().getFoodType().getName());
-                
+                if (assigned) {
+                    System.out.println("新顧客到達: " + customer + " 點了 " + customer.getOrder().getFoodType().getName());
+                } else {
+                    System.out.println("新顧客到達: " + customer + "（暫無座位，等待中）");
+                }
                 // 安排下一個顧客
                 scheduleNextCustomer();
                 
@@ -136,24 +163,11 @@ public class RestaurantSimulator {
      * 停止模擬系統
      */
     public void stopSimulation() {
-        if (!running) return;
-        
         running = false;
-        System.out.println("正在停止餐廳模擬系統...");
-        
-        // 停止顧客生成
-        if (customerGenerator != null && !customerGenerator.isShutdown()) {
-            customerGenerator.shutdown();
-            try {
-                if (!customerGenerator.awaitTermination(2, TimeUnit.SECONDS)) {
-                    customerGenerator.shutdownNow();
-                }
-            } catch (InterruptedException e) {
-                customerGenerator.shutdownNow();
-                Thread.currentThread().interrupt();
-            }
-        }
-        
+        if (customerGenerator != null) customerGenerator.shutdownNow();
+        if (workerExecutor != null) workerExecutor.shutdownNow();
+        if (tableReleaseScheduler != null) tableReleaseScheduler.shutdownNow();
+
         // 停止工作人員
         for (Worker worker : workers) {
             if (worker != null) {
@@ -165,19 +179,6 @@ public class RestaurantSimulator {
         for (Thread workerThread : workerThreads) {
             if (workerThread != null && workerThread.isAlive()) {
                 workerThread.interrupt();
-            }
-        }
-        
-        // 停止工作人員執行緒池
-        if (workerExecutor != null && !workerExecutor.isShutdown()) {
-            workerExecutor.shutdown();
-            try {
-                if (!workerExecutor.awaitTermination(3, TimeUnit.SECONDS)) {
-                    workerExecutor.shutdownNow();
-                }
-            } catch (InterruptedException e) {
-                workerExecutor.shutdownNow();
-                Thread.currentThread().interrupt();
             }
         }
         
