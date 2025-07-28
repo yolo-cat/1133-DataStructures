@@ -9,8 +9,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * 餐廳模擬系統GUI - 使用Swing實作動畫效果
  */
 public class RestaurantGUI extends JFrame {
-    private static final int WINDOW_WIDTH = 1000;
-    private static final int WINDOW_HEIGHT = 700;
+    private static final int WINDOW_WIDTH = 1200;
+    private static final int WINDOW_HEIGHT = 1000;
     
     // GUI組件
     private JPanel customerPanel;
@@ -57,7 +57,7 @@ public class RestaurantGUI extends JFrame {
         createQueuePanel();
         createWorkerPanel();
         createCompletedPanel();
-        createControlPanel();
+        JPanel controlPanel = createControlPanel();
         createTableStatusPanel(); // 新增座位狀態面板
 
         // 布局設計
@@ -68,6 +68,7 @@ public class RestaurantGUI extends JFrame {
         mainPanel.add(workerPanel);
         mainPanel.add(completedPanel);
         
+        add(controlPanel, BorderLayout.NORTH); // 控制面板放置在頂部
         add(mainPanel, BorderLayout.CENTER);
         add(tableStatusPanel, BorderLayout.SOUTH); // 底部顯示座位狀態
 
