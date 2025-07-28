@@ -20,6 +20,10 @@ public class RestaurantTest {
         Customer customer1 = new Customer();
         Customer customer2 = new Customer();
         
+        // 測試分配桌號和訂單
+        customer1.assignTableAndOrder(1, Order.FoodType.BURGER);
+        customer2.assignTableAndOrder(2, Order.FoodType.FRIES);
+        
         System.out.println(customer1);
         System.out.println(customer2);
         System.out.println("顧客1的訂單: " + customer1.getOrder());
@@ -45,8 +49,11 @@ public class RestaurantTest {
         System.out.println("\n4. 測試Worker執行緒 (5秒測試):");
         
         // 添加一些測試訂單
+        Order.FoodType[] foods = Order.FoodType.values();
         for (int i = 0; i < 5; i++) {
             Customer customer = new Customer();
+            // 為測試目的分配桌號和訂單
+            customer.assignTableAndOrder(i + 1, foods[i % foods.length]);
             queue.addOrder(customer.getOrder());
         }
         
