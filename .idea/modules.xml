@@ -8,10 +8,10 @@
       <module fileurl="file://$PROJECT_DIR$/0715-Array/0715-Array.iml" filepath="$PROJECT_DIR$/0715-Array/0715-Array.iml" />
       <module fileurl="file://$PROJECT_DIR$/0723-LinkedList/0723-LinkedList.iml" filepath="$PROJECT_DIR$/0723-LinkedList/0723-LinkedList.iml" />
       <module fileurl="file://$PROJECT_DIR$/0728-Queue/0728-Queue.iml" filepath="$PROJECT_DIR$/0728-Queue/0728-Queue.iml" />
+      <module fileurl="file://$PROJECT_DIR$/0729-Tree/0729-BinaryTreeArray/0729-BinaryTreeArray.iml" filepath="$PROJECT_DIR$/0729-Tree/0729-BinaryTreeArray/0729-BinaryTreeArray.iml" />
       <module fileurl="file://$PROJECT_DIR$/0729-Tree/0729-HeapApplication/0729-HeapApplication.iml" filepath="$PROJECT_DIR$/0729-Tree/0729-HeapApplication/0729-HeapApplication.iml" />
       <module fileurl="file://$PROJECT_DIR$/0729-Tree/0729-Tree.iml" filepath="$PROJECT_DIR$/0729-Tree/0729-Tree.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/1133-DataStructures.iml" filepath="$PROJECT_DIR$/.idea/1133-DataStructures.iml" />
-      <module fileurl="file://$PROJECT_DIR$/0729-Tree/BinaryTreeArray/BinaryTreeArray.iml" filepath="$PROJECT_DIR$/0729-Tree/BinaryTreeArray/BinaryTreeArray.iml" />
     </modules>
   </component>
 </project>
