@@ -7,19 +7,29 @@
 - [x] 實作 Consumer 執行緒類別
 - [x] 優化 Item 編號生成（100~999隨機數字）
 - [x] 驗證 MinHeapBuffer 的 Min-Heap 效能（O(log n) 插入/取出）
+- [x] 實作 Machine 執行緒類別（每 0.24 秒從 buffer 取出最小編號物品進行處理，buffer 空則等待）
+- [x] 實作 EnhancedConsumer 執行緒類別（每 0.24 秒從 buffer 取出最小編號物品，buffer 空則等待）
 
 ## 2. 執行緒協調
 - [x] 緩衝區操作同步（wait/notify 或 Condition）
 - [x] 生產者-消費者協調邏輯
+- [x] 機台與消費者執行緒協調邏輯（確保機台與消費者分別正確處理/消費最小編號物品）
+    - [x] 設計「機台暫存區」(如 processedQueue) 或於 Item 增加狀態欄位
+    - [x] 機台執行緒從 buffer 取物品，處理後放入暫存區或標記狀態
+    - [x] 消費者執行緒僅從暫存區消費（或僅消費已處理物品）
+    - [x] 機台-消費者間同步協調（wait/notify）
 
 ## 3. GUI 介面
 - [x] 設計 GUI 介面（開始生產按鈕、buffer 大小設定）
 - [x] 顯示 buffer 狀態與物品流動
 - [x] 顯示輸出分為四個區域：生產者、buffer 狀態、機台、消費者，以便清楚區分各部分功能
+- [x] 機台區域顯示：顯示機台正在處理的物品編號
+- [x] 消費者區域顯示：顯示消費者取出的物品編號
 
 ## 4. 主程式整合
 - [x] 整合主程式，啟動 Producer/Consumer 執行緒
 - [x] 連接 GUI 與核心邏輯
+- [x] 整合 Machine 與 EnhancedConsumer 執行緒的啟動與協調
 
 ## 5. Min-Heap 效能優化與驗證
 - [ ] 實作效能測試：比較線性搜尋 vs Min-Heap 效能

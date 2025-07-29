@@ -1,11 +1,11 @@
 public class EnhancedConsumer extends Thread {
-    private final MinHeapBuffer buffer;
+    private final ProcessedQueue processedQueue;
     private final int consumeIntervalMs;
     private final ProducerConsumerGUI gui;
     private volatile boolean running = true;
 
-    public EnhancedConsumer(MinHeapBuffer buffer, int consumeIntervalMs, ProducerConsumerGUI gui) {
-        this.buffer = buffer;
+    public EnhancedConsumer(ProcessedQueue processedQueue, int consumeIntervalMs, ProducerConsumerGUI gui) {
+        this.processedQueue = processedQueue;
         this.consumeIntervalMs = consumeIntervalMs;
         this.gui = gui;
     }
@@ -18,7 +18,7 @@ public class EnhancedConsumer extends Thread {
     public void run() {
         try {
             while (running) {
-                Item item = buffer.take();
+                Item item = processedQueue.take();
                 String message = "消費: " + item;
                 System.out.println(message);
                 if (gui != null) {

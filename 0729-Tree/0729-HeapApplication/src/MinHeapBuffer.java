@@ -38,5 +38,12 @@ public class MinHeapBuffer {
     public synchronized boolean isEmpty() {
         return heap.isEmpty();
     }
-}
 
+    public synchronized String itemsInfo() {
+        StringBuilder sb = new StringBuilder();
+        for (Item item : heap) {
+            sb.append(item.toString()).append("\n");
+        }
+        return sb.toString();
+    }
+}

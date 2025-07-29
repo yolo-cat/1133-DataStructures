@@ -17,7 +17,10 @@ public class ProducerConsumerGUI extends JFrame {
     private MinHeapBuffer buffer;
     private Producer producer;
     private EnhancedConsumer consumer;
+    private ProcessedQueue processedQueue;
+    private Machine machine;
     private Timer updateTimer;
+    private FlowVisualizationPanel flowPanel;
 
     public ProducerConsumerGUI() {
         initializeComponents();
@@ -59,6 +62,9 @@ public class ProducerConsumerGUI extends JFrame {
 
         bufferSizeLabel = new JLabel("緩衝區大小:");
         currentBufferSizeLabel = new JLabel("當前緩衝區: 0/0");
+
+        // 初始化流程動畫面板
+        flowPanel = new FlowVisualizationPanel();
     }
 
     private void setupLayout() {
@@ -105,6 +111,7 @@ public class ProducerConsumerGUI extends JFrame {
 
         add(controlPanel, BorderLayout.NORTH);
         add(mainPanel, BorderLayout.CENTER);
+        add(flowPanel, BorderLayout.SOUTH);
     }
 
     private void setupEventHandlers() {
@@ -136,11 +143,14 @@ public class ProducerConsumerGUI extends JFrame {
 
             // 初始化緩衝區和執行緒
             buffer = new MinHeapBuffer(bufferSize);
+            processedQueue = new ProcessedQueue(bufferSize); // 暫存區容量同 buffer
             producer = new Producer(buffer, 200, this);
-            consumer = new EnhancedConsumer(buffer, 240, this);
+            machine = new Machine(buffer, processedQueue, 240, this);
+            consumer = new EnhancedConsumer(processedQueue, 240, this);
 
             // 啟動執行緒
             producer.start();
+            machine.start();
             consumer.start();
 
             // 更新 UI 狀態
@@ -154,6 +164,7 @@ public class ProducerConsumerGUI extends JFrame {
             appendToMachine("=== 系統啟動 ===");
             appendToMachine("緩衝區大小: " + bufferSize);
             appendToMachine("生產週期: 200ms");
+            appendToMachine("機台處理週期: 240ms");
             appendToMachine("消費週期: 240ms");
 
         } catch (NumberFormatException ex) {
@@ -164,6 +175,9 @@ public class ProducerConsumerGUI extends JFrame {
     private void stopProduction() {
         if (producer != null) {
             producer.stopProducer();
+        }
+        if (machine != null) {
+            machine.stopMachine();
         }
         if (consumer != null) {
             consumer.stopConsumer();
@@ -231,6 +245,10 @@ public class ProducerConsumerGUI extends JFrame {
             }
             status.append("]\n\n");
 
+            status.append("=== Buffer 內容 ===\n");
+            status.append(buffer.itemsInfo());
+            status.append("\n");
+
             status.append("=== 歷史統計 ===\n");
             // 這裡可以添加更多統計信息
 
@@ -258,6 +276,25 @@ public class ProducerConsumerGUI extends JFrame {
             consumerArea.append(getCurrentTime() + " " + message + "\n");
             consumerArea.setCaretPosition(consumerArea.getDocument().getLength());
         });
+    }
+
+    // 動畫觸發方法
+    public void triggerProducerToBufferAnimation(Item item) {
+        if (flowPanel != null) {
+            flowPanel.addProducerToBuffer(item);
+        }
+    }
+
+    public void triggerBufferToMachineAnimation(Item item) {
+        if (flowPanel != null) {
+            flowPanel.addBufferToMachine(item);
+        }
+    }
+
+    public void triggerMachineToConsumerAnimation(Item item) {
+        if (flowPanel != null) {
+            flowPanel.addMachineToConsumer(item);
+        }
     }
 
     private String getCurrentTime() {

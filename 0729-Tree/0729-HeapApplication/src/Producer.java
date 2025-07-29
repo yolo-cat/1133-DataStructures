@@ -29,6 +29,7 @@ public class Producer extends Thread {
                 System.out.println(message);
                 if (gui != null) {
                     gui.appendToProducer(message);
+                    gui.triggerProducerToBufferAnimation(item); // 觸發動畫
                 }
                 Thread.sleep(produceIntervalMs);
             }
