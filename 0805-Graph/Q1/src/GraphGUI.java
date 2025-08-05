@@ -232,6 +232,42 @@ public class GraphGUI extends JFrame {
     return graph;
 }
 
+  private List<String> dfs(String start, Map<String, List<String>> graph) {
+    List<String> result = new ArrayList<>();
+    Set<String> visited = new HashSet<>();
+    dfsHelper(start, graph, visited, result);
+    return result;
+}
+
+private void dfsHelper(String node, Map<String, List<String>> graph, Set<String> visited, List<String> result) {
+    if (!visited.contains(node)) {
+        visited.add(node);
+        result.add(node);
+        for (String neighbor : graph.get(node)) {
+            dfsHelper(neighbor, graph, visited, result);
+        }
+    }
+}
+
+private List<String> bfs(String start, Map<String, List<String>> graph) {
+    List<String> result = new ArrayList<>();
+    Set<String> visited = new HashSet<>();
+    Queue<String> queue = new LinkedList<>();
+    queue.add(start);
+    visited.add(start);
+    while (!queue.isEmpty()) {
+        String node = queue.poll();
+        result.add(node);
+        for (String neighbor : graph.get(node)) {
+            if (!visited.contains(neighbor)) {
+                queue.add(neighbor);
+                visited.add(neighbor);
+            }
+        }
+    }
+    return result;
+}
+
   public static void main(String[] args) {
     SwingUtilities.invokeLater(() -> new GraphGUI().setVisible(true));
   }
