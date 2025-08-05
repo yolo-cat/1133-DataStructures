@@ -23,7 +23,7 @@ public class GraphGUI extends JFrame {
   public GraphGUI() {
     setTitle("Graph Application");
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    setSize(800, 800);
+    setSize(1500, 600);
 
     GraphPanel panel = new GraphPanel();
     add(panel, BorderLayout.CENTER);
@@ -44,10 +44,20 @@ public class GraphGUI extends JFrame {
     addNodeBtn.addActionListener(e -> {
       String name = nodeNameField.getText().trim();
       if (!name.isEmpty() && !nodes.containsKey(name)) {
-        // 隨機產生座標
-        int x = new Random().nextInt(450) + 50;
-        int y = new Random().nextInt(400) + 50;
-        nodes.put(name, new Point(x, y));
+        // 隨機產生不重複且距離足夠的座標
+        Point p;
+        Random rand = new Random();
+        int minDist = 500; // 節點間最小距離
+        outer: while (true) {
+          int x = rand.nextInt(1000) + 100;
+          int y = rand.nextInt(400) + 100;
+          p = new Point(x, y);
+          for (Point exist : nodes.values()) {
+            if (p.distance(exist) < minDist) continue outer;
+          }
+          break;
+        }
+        nodes.put(name, p);
         nodeNameField.setText(""); // 新增後清空輸入框
         panel.repaint();
       }
@@ -120,6 +130,20 @@ public class GraphGUI extends JFrame {
     JButton bfsBtn = new JButton("BFS");
     gbc.gridx = 3; controlPanel.add(bfsBtn, gbc);
 
+    // 輸出區塊
+    JTextArea outputArea = new JTextArea(6, 18);
+    outputArea.setEditable(false);
+    outputArea.setLineWrap(true);
+    outputArea.setWrapStyleWord(true);
+    JScrollPane outputScroll = new JScrollPane(outputArea);
+    gbc.gridy = 4; gbc.gridx = 0; gbc.gridwidth = 5;
+    gbc.fill = GridBagConstraints.BOTH;
+    gbc.weightx = 1.0; gbc.weighty = 1.0;
+    controlPanel.add(outputScroll, gbc);
+    gbc.gridwidth = 1;
+    gbc.weightx = 0; gbc.weighty = 0;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+
     add(controlPanel, BorderLayout.EAST);
 
     dfsBtn.addActionListener(e -> {
@@ -129,6 +153,7 @@ public class GraphGUI extends JFrame {
         return;
       }
       traversalResult = dfs(start, getAdjacencyList());
+      outputArea.setText("DFS: " + String.join(" ", traversalResult));
       startAnimation(panel);
     });
     bfsBtn.addActionListener(e -> {
@@ -138,6 +163,7 @@ public class GraphGUI extends JFrame {
         return;
       }
       traversalResult = bfs(start, getAdjacencyList());
+      outputArea.setText("BFS: " + String.join(" ", traversalResult));
       startAnimation(panel);
     });
   }
@@ -212,12 +238,21 @@ public class GraphGUI extends JFrame {
     edges.clear();
 
     Random rand = new Random();
-    // 產生節點
+    int minDist = 60; // 節點間最小距離
+    // 產生節點（自動產生時也避免重複位置且距離足夠）
     for (int i = 0; i < nNodes; ++i) {
       String name = "N" + i;
-      int x = rand.nextInt(450) + 50;
-      int y = rand.nextInt(400) + 50;
-      nodes.put(name, new Point(x, y));
+      Point p;
+      outer: while (true) {
+        int x = rand.nextInt(450) + 50;
+        int y = rand.nextInt(400) + 50;
+        p = new Point(x, y);
+        for (Point exist : nodes.values()) {
+          if (p.distance(exist) < minDist) continue outer;
+        }
+        break;
+      }
+      nodes.put(name, p);
     }
     // 產生隨機不重複的邊
     Set<Edge> generatedEdges = new HashSet<>();
