@@ -158,15 +158,13 @@ public class GraphGUI extends JFrame {
       int idx = 0;
       for (String name : nodes.keySet()) {
         Point p = nodes.get(name);
-        if (traversalResult.contains(name)) {
-          if (idx == 0 && traversalResult.get(0).equals(name)) {
-            g.setColor(Color.RED); // 第一個節點紅色
-          } else {
-            g.setColor(Color.GREEN); // 其它遍歷節點綠色
-          }
-          idx++;
+        if (!traversalResult.isEmpty() && traversalResult.contains(name)) {
+            if (traversalResult.indexOf(name) == 0)
+                g.setColor(Color.RED);  // 起點紅
+            else
+                g.setColor(Color.GREEN); // 其它綠
         } else {
-          g.setColor(Color.GRAY); // 未遍歷節點灰色
+            g.setColor(Color.RED); // 沒被搜尋到也可以用原來顏色
         }
         g.fillOval(p.x - 20, p.y - 20, 40, 40);
         g.setColor(Color.WHITE);
