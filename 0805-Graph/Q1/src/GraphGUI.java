@@ -28,6 +28,7 @@ public class GraphGUI extends JFrame {
     GraphPanel panel = new GraphPanel();
     add(panel, BorderLayout.CENTER);
 
+    // 將控制區放到右側
     JPanel controlPanel = new JPanel(new GridBagLayout());
     GridBagConstraints gbc = new GridBagConstraints();
     gbc.insets = new Insets(2, 2, 2, 2);
@@ -119,7 +120,7 @@ public class GraphGUI extends JFrame {
     JButton bfsBtn = new JButton("BFS");
     gbc.gridx = 3; controlPanel.add(bfsBtn, gbc);
 
-    add(controlPanel, BorderLayout.SOUTH);
+    add(controlPanel, BorderLayout.EAST);
 
     dfsBtn.addActionListener(e -> {
       String start = startNodeField.getText().trim();
