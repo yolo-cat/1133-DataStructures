@@ -118,6 +118,27 @@ public class GraphGUI extends JFrame {
     gbc.gridx = 3; controlPanel.add(bfsBtn, gbc);
 
     add(controlPanel, BorderLayout.SOUTH);
+
+    dfsBtn.addActionListener(e -> {
+      String start = startNodeField.getText().trim();
+      Map<String, List<String>> graph = getAdjacencyList();
+      if (!start.isEmpty() && graph.containsKey(start)) {
+        traversalResult = dfs(start, graph);
+        panel.repaint();
+      } else {
+        JOptionPane.showMessageDialog(this, "請輸入有效的起點節點名稱！", "錯誤", JOptionPane.ERROR_MESSAGE);
+      }
+    });
+    bfsBtn.addActionListener(e -> {
+      String start = startNodeField.getText().trim();
+      Map<String, List<String>> graph = getAdjacencyList();
+      if (!start.isEmpty() && graph.containsKey(start)) {
+        traversalResult = bfs(start, graph);
+        panel.repaint();
+      } else {
+        JOptionPane.showMessageDialog(this, "請輸入有效的起點節點名稱！", "錯誤", JOptionPane.ERROR_MESSAGE);
+      }
+    });
   }
 
   // 畫圖區
