@@ -121,23 +121,21 @@ public class GraphGUI extends JFrame {
 
     dfsBtn.addActionListener(e -> {
       String start = startNodeField.getText().trim();
-      Map<String, List<String>> graph = getAdjacencyList();
-      if (!start.isEmpty() && graph.containsKey(start)) {
-        traversalResult = dfs(start, graph);
-        panel.repaint();
-      } else {
-        JOptionPane.showMessageDialog(this, "請輸入有效的起點節點名稱！", "錯誤", JOptionPane.ERROR_MESSAGE);
+      if (!nodes.containsKey(start)) {
+        JOptionPane.showMessageDialog(this, "Start node does not exist.", "Error", JOptionPane.ERROR_MESSAGE);
+        return;
       }
+      traversalResult = dfs(start, getAdjacencyList());
+      repaint();
     });
     bfsBtn.addActionListener(e -> {
       String start = startNodeField.getText().trim();
-      Map<String, List<String>> graph = getAdjacencyList();
-      if (!start.isEmpty() && graph.containsKey(start)) {
-        traversalResult = bfs(start, graph);
-        panel.repaint();
-      } else {
-        JOptionPane.showMessageDialog(this, "請輸入有效的起點節點名稱！", "錯誤", JOptionPane.ERROR_MESSAGE);
+      if (!nodes.containsKey(start)) {
+        JOptionPane.showMessageDialog(this, "Start node does not exist.", "Error", JOptionPane.ERROR_MESSAGE);
+        return;
       }
+      traversalResult = bfs(start, getAdjacencyList());
+      repaint();
     });
   }
 
