@@ -234,8 +234,8 @@ public class GraphGUI extends JFrame {
     repaint();
   }
 
-  private Map<String, List<String>> getAdjacencyList() {
-    Map<String, List<String>> graph = new HashMap<>();
+  private Map<String, java.util.List<String>> getAdjacencyList() {
+    Map<String, java.util.List<String>> graph = new HashMap<>();
     for (String name : nodes.keySet()) {
         graph.put(name, new ArrayList<>());
     }
@@ -249,14 +249,14 @@ public class GraphGUI extends JFrame {
     return graph;
 }
 
-  private List<String> dfs(String start, Map<String, List<String>> graph) {
-    List<String> result = new ArrayList<>();
+  private java.util.List<String> dfs(String start, Map<String, java.util.List<String>> graph) {
+    java.util.List<String> result = new ArrayList<>();
     Set<String> visited = new HashSet<>();
     dfsHelper(start, graph, visited, result);
     return result;
 }
 
-private void dfsHelper(String node, Map<String, List<String>> graph, Set<String> visited, List<String> result) {
+private void dfsHelper(String node, Map<String, java.util.List<String>> graph, Set<String> visited, java.util.List<String> result) {
     if (!visited.contains(node)) {
         visited.add(node);
         result.add(node);
@@ -266,8 +266,8 @@ private void dfsHelper(String node, Map<String, List<String>> graph, Set<String>
     }
 }
 
-private List<String> bfs(String start, Map<String, List<String>> graph) {
-    List<String> result = new ArrayList<>();
+private java.util.List<String> bfs(String start, Map<String, java.util.List<String>> graph) {
+    java.util.List<String> result = new ArrayList<>();
     Set<String> visited = new HashSet<>();
     Queue<String> queue = new LinkedList<>();
     queue.add(start);
