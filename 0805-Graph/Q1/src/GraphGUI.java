@@ -217,6 +217,21 @@ public class GraphGUI extends JFrame {
     repaint();
   }
 
+  private Map<String, List<String>> getAdjacencyList() {
+    Map<String, List<String>> graph = new HashMap<>();
+    for (String name : nodes.keySet()) {
+        graph.put(name, new ArrayList<>());
+    }
+    for (Edge edge : edges) {
+        // 無向圖兩邊加
+        if(graph.containsKey(edge.from) && graph.containsKey(edge.to)) {
+            graph.get(edge.from).add(edge.to);
+            graph.get(edge.to).add(edge.from);
+        }
+    }
+    return graph;
+}
+
   public static void main(String[] args) {
     SwingUtilities.invokeLater(() -> new GraphGUI().setVisible(true));
   }
