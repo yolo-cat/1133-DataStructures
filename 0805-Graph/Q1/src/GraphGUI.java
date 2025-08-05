@@ -33,7 +33,7 @@ public class GraphGUI extends JFrame {
   public GraphGUI() {
     setTitle("Graph Application - Windows 3.1 Style");
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    setSize(1200, 700);
+    setSize(1000, 700);
 
     // 設置整體外觀
     try {
@@ -92,7 +92,7 @@ public class GraphGUI extends JFrame {
     controlPanel.add(Box.createVerticalStrut(10));
 
     // MST和最短路徑區域
-    controlPanel.add(createAlgorithmSection());
+//    controlPanel.add(createAlgorithmSection());
     controlPanel.add(Box.createVerticalStrut(10));
 
     // 輸出區域
@@ -254,67 +254,14 @@ public class GraphGUI extends JFrame {
     return panel;
   }
 
-  private JPanel createAlgorithmSection() {
-    JPanel panel = createSectionPanel("Algorithms");
-
-    JButton mstBtn = createWin31Button("Show MST");
-    mstBtn.addActionListener(e -> {
-      highlightEdges = graph.getMST();
-      highlightType = "MST";
-      int totalCost = highlightEdges.stream().mapToInt(edge -> edge.cost).sum();
-      updateOutputArea("MST Total Cost: " + totalCost);
-      repaint();
-    });
-
-    JPanel mstPanel = new JPanel(new FlowLayout());
-    mstPanel.setBackground(WIN31_GRAY);
-    mstPanel.add(mstBtn);
-    panel.add(mstPanel);
-
-    // 最短路徑
-    JPanel pathInputPanel = new JPanel(new GridLayout(2, 2, 5, 5));
-    pathInputPanel.setBackground(WIN31_GRAY);
-
-    pathInputPanel.add(new JLabel("From:"));
-    styleTextField(pathFromField);
-    pathInputPanel.add(pathFromField);
-    pathInputPanel.add(new JLabel("To:"));
-    styleTextField(pathToField);
-    pathInputPanel.add(pathToField);
-
-    panel.add(pathInputPanel);
-
-    JButton pathBtn = createWin31Button("Find Shortest Path");
-    pathBtn.addActionListener(e -> {
-      String from = pathFromField.getText().trim();
-      String to = pathToField.getText().trim();
-      if (!graph.containsNode(from) || !graph.containsNode(to)) {
-        showWin31MessageDialog("Node not found!", "Error");
-        return;
-      }
-      java.util.List<Edge> path = graph.getShortestPath(from, to);
-      if (path == null || path.isEmpty()) {
-        showWin31MessageDialog("No path found!", "Info");
-        highlightEdges = new ArrayList<>();
-        highlightType = "PATH";
-        updateOutputArea("No path from " + from + " to " + to);
-      } else {
-        highlightEdges = path;
-        highlightType = "PATH";
-        int totalCost = path.stream().mapToInt(edge -> edge.cost).sum();
-        updateOutputArea("Shortest Path Cost: " + totalCost + " | Path: " +
-          from + " → " + to);
-      }
-      repaint();
-    });
-
-    JPanel pathButtonPanel = new JPanel(new FlowLayout());
-    pathButtonPanel.setBackground(WIN31_GRAY);
-    pathButtonPanel.add(pathBtn);
-    panel.add(pathButtonPanel);
-
-    return panel;
-  }
+//  private JPanel createAlgorithmSection() {
+//    JPanel panel = createSectionPanel("Algorithms");
+//    JLabel disabledLabel = new JLabel("此區塊功能已關閉");
+//    disabledLabel.setForeground(Color.RED);
+//    disabledLabel.setFont(new Font("MS Sans Serif", Font.BOLD, 13));
+//    panel.add(disabledLabel);
+//    return panel;
+//  }
 
   private JPanel createOutputSection() {
     JPanel panel = createSectionPanel("Output");
@@ -416,23 +363,7 @@ public class GraphGUI extends JFrame {
           g2d.setColor(WIN31_DARK_GRAY);
           g2d.setStroke(new BasicStroke(1));
           g2d.drawLine(p1.x, p1.y, p2.x, p2.y);
-
-          // 在邊的中點顯示 cost
-          int mx = (p1.x + p2.x) / 2;
-          int my = (p1.y + p2.y) / 2;
-          g2d.setColor(WIN31_BLUE);
-          g2d.setFont(new Font("MS Sans Serif", Font.BOLD, 10));
-
-          // 添加白色背景使文字更清晰
-          FontMetrics fm = g2d.getFontMetrics();
-          String costStr = String.valueOf(edge.cost);
-          int strWidth = fm.stringWidth(costStr);
-          int strHeight = fm.getHeight();
-          g2d.setColor(WIN31_WHITE);
-          g2d.fillRect(mx - strWidth/2 - 2, my - strHeight/2 - 1,
-                      strWidth + 4, strHeight + 2);
-          g2d.setColor(WIN31_BLUE);
-          g2d.drawString(costStr, mx - strWidth/2, my + fm.getAscent()/2);
+          // 不再顯示 cost 值
         }
       }
 
@@ -446,21 +377,7 @@ public class GraphGUI extends JFrame {
           g2d.setColor(highlightColor);
           g2d.setStroke(new BasicStroke(3));
           g2d.drawLine(p1.x, p1.y, p2.x, p2.y);
-
-          // 高亮邊的 cost
-          int mx = (p1.x + p2.x) / 2;
-          int my = (p1.y + p2.y) / 2;
-          g2d.setFont(new Font("MS Sans Serif", Font.BOLD, 12));
-
-          FontMetrics fm = g2d.getFontMetrics();
-          String costStr = String.valueOf(edge.cost);
-          int strWidth = fm.stringWidth(costStr);
-          int strHeight = fm.getHeight();
-          g2d.setColor(Color.YELLOW);
-          g2d.fillRect(mx - strWidth/2 - 3, my - strHeight/2 - 2,
-                      strWidth + 6, strHeight + 4);
-          g2d.setColor(Color.RED);
-          g2d.drawString(costStr, mx - strWidth/2, my + fm.getAscent()/2);
+          // 不再顯示 cost 值
         }
       }
 
@@ -499,8 +416,6 @@ public class GraphGUI extends JFrame {
       }
     }
   }
-
-  // ...existing code...
 
   private void startAnimation() {
     animationIndex = 0;
