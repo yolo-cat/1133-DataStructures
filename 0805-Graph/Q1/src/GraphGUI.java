@@ -14,6 +14,9 @@ public class GraphGUI extends JFrame {
   private JTextField toField = new JTextField(3);
   private JTextField nodeCountField = new JTextField(3);
   private JTextField edgeCountField = new JTextField(3);
+  private JTextField startNodeField = new JTextField(3);
+  private java.util.List<String> traversalResult = new ArrayList<>();
+
 
   public GraphGUI() {
     setTitle("Graph Application");
@@ -104,6 +107,16 @@ public class GraphGUI extends JFrame {
     gbc.gridx = 4;
     controlPanel.add(autoGenBtn, gbc);
 
+    gbc.gridy = 3; gbc.gridx = 0;
+    controlPanel.add(new JLabel("Start Node:"), gbc);
+    gbc.gridx = 1;
+    controlPanel.add(startNodeField, gbc);
+
+    JButton dfsBtn = new JButton("DFS");
+    gbc.gridx = 2; controlPanel.add(dfsBtn, gbc);
+    JButton bfsBtn = new JButton("BFS");
+    gbc.gridx = 3; controlPanel.add(bfsBtn, gbc);
+
     add(controlPanel, BorderLayout.SOUTH);
   }
 
@@ -120,10 +133,20 @@ public class GraphGUI extends JFrame {
           g.drawLine(p1.x, p1.y, p2.x, p2.y);
         }
       }
-      // 畫節點
+      // 畫節點，根據 traversalResult 著色
+      int idx = 0;
       for (String name : nodes.keySet()) {
         Point p = nodes.get(name);
-        g.setColor(Color.RED);
+        if (traversalResult.contains(name)) {
+          if (idx == 0 && traversalResult.get(0).equals(name)) {
+            g.setColor(Color.RED); // 第一個節點紅色
+          } else {
+            g.setColor(Color.GREEN); // 其它遍歷節點綠色
+          }
+          idx++;
+        } else {
+          g.setColor(Color.GRAY); // 未遍歷節點灰色
+        }
         g.fillOval(p.x - 20, p.y - 20, 40, 40);
         g.setColor(Color.WHITE);
         g.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 18));
