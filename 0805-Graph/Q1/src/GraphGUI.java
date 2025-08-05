@@ -4,11 +4,7 @@ import java.awt.event.*;
 import java.util.*;
 
 public class GraphGUI extends JFrame {
-  // 節點資料(Key:名稱, Value:位置)
-  private Map<String, Point> nodes = new HashMap<>();
-  // 邊資料
-  private java.util.List<Edge> edges = new ArrayList<>();
-  // 介面元件
+  private Graph graph = new Graph();
   private JTextField nodeNameField = new JTextField(5);
   private JTextField fromField = new JTextField(3);
   private JTextField toField = new JTextField(3);
@@ -19,7 +15,6 @@ public class GraphGUI extends JFrame {
   private int animationIndex = 0;
   private javax.swing.Timer animationTimer;
 
-
   public GraphGUI() {
     setTitle("Graph Application");
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -28,7 +23,6 @@ public class GraphGUI extends JFrame {
     GraphPanel panel = new GraphPanel();
     add(panel, BorderLayout.CENTER);
 
-    // 將控制區放到右側
     JPanel controlPanel = new JPanel(new GridBagLayout());
     GridBagConstraints gbc = new GridBagConstraints();
     gbc.insets = new Insets(2, 2, 2, 2);
@@ -43,33 +37,30 @@ public class GraphGUI extends JFrame {
 
     addNodeBtn.addActionListener(e -> {
       String name = nodeNameField.getText().trim();
-      if (!name.isEmpty() && !nodes.containsKey(name)) {
-        // 隨機產生不重複且距離足夠的座標
+      if (!name.isEmpty() && !graph.containsNode(name)) {
         Point p;
         Random rand = new Random();
-        int minDist = 500; // 節點間最小距離
+        int minDist = 60;
         outer: while (true) {
           int x = rand.nextInt(1000) + 100;
           int y = rand.nextInt(400) + 100;
           p = new Point(x, y);
-          for (Point exist : nodes.values()) {
+          for (Point exist : graph.getNodes().values()) {
             if (p.distance(exist) < minDist) continue outer;
           }
           break;
         }
-        nodes.put(name, p);
-        nodeNameField.setText(""); // 新增後清空輸入框
+        graph.addNode(name, p);
+        nodeNameField.setText("");
         panel.repaint();
       }
     });
 
     removeNodeBtn.addActionListener(e -> {
       String name = nodeNameField.getText().trim();
-      if (nodes.containsKey(name)) {
-        nodes.remove(name);
-        // 移除相關的邊
-        edges.removeIf(edge -> edge.from.equals(name) || edge.to.equals(name));
-        nodeNameField.setText(""); // 刪除後清空輸入框
+      if (graph.containsNode(name)) {
+        graph.removeNode(name);
+        nodeNameField.setText("");
         panel.repaint();
       }
     });
@@ -92,14 +83,11 @@ public class GraphGUI extends JFrame {
     addEdgeBtn.addActionListener(e -> {
       String from = fromField.getText().trim();
       String to = toField.getText().trim();
-      if (nodes.containsKey(from) && nodes.containsKey(to) && !from.equals(to)) {
-        Edge newEdge = new Edge(from, to);
-        if (!edges.contains(newEdge)) {
-          edges.add(newEdge);
-          fromField.setText(""); // 新增後清空
-          toField.setText("");
-          panel.repaint();
-        }
+      if (graph.containsNode(from) && graph.containsNode(to) && !from.equals(to)) {
+        graph.addEdge(from, to);
+        fromField.setText("");
+        toField.setText("");
+        panel.repaint();
       }
     });
 
@@ -130,7 +118,6 @@ public class GraphGUI extends JFrame {
     JButton bfsBtn = new JButton("BFS");
     gbc.gridx = 3; controlPanel.add(bfsBtn, gbc);
 
-    // 輸出區塊
     JTextArea outputArea = new JTextArea(6, 18);
     outputArea.setEditable(false);
     outputArea.setLineWrap(true);
@@ -148,50 +135,47 @@ public class GraphGUI extends JFrame {
 
     dfsBtn.addActionListener(e -> {
       String start = startNodeField.getText().trim();
-      if (!nodes.containsKey(start)) {
+      if (!graph.containsNode(start)) {
         JOptionPane.showMessageDialog(this, "Start node does not exist.", "Error", JOptionPane.ERROR_MESSAGE);
         return;
       }
-      traversalResult = dfs(start, getAdjacencyList());
-      outputArea.setText("DFS: " + String.join(" ", traversalResult));
+      traversalResult = graph.dfs(start);
+      outputArea.setText("DFS: " + String.join("  ", traversalResult));
       startAnimation(panel);
     });
     bfsBtn.addActionListener(e -> {
       String start = startNodeField.getText().trim();
-      if (!nodes.containsKey(start)) {
+      if (!graph.containsNode(start)) {
         JOptionPane.showMessageDialog(this, "Start node does not exist.", "Error", JOptionPane.ERROR_MESSAGE);
         return;
       }
-      traversalResult = bfs(start, getAdjacencyList());
-      outputArea.setText("BFS: " + String.join(" ", traversalResult));
+      traversalResult = graph.bfs(start);
+      outputArea.setText("BFS: " + String.join("  ", traversalResult));
       startAnimation(panel);
     });
   }
 
-  // 畫圖區
   class GraphPanel extends JPanel {
     protected void paintComponent(Graphics g) {
       super.paintComponent(g);
-      // 畫邊
-      for (Edge edge : edges) {
-        Point p1 = nodes.get(edge.from);
-        Point p2 = nodes.get(edge.to);
+      for (Edge edge : graph.getEdges()) {
+        Point p1 = graph.getNodes().get(edge.from);
+        Point p2 = graph.getNodes().get(edge.to);
         if (p1 != null && p2 != null) {
           g.setColor(Color.BLACK);
           g.drawLine(p1.x, p1.y, p2.x, p2.y);
         }
       }
-      // 畫節點，根據 traversalResult 著色動畫
-      for (String name : nodes.keySet()) {
-        Point p = nodes.get(name);
+      for (String name : graph.getNodes().keySet()) {
+        Point p = graph.getNodes().get(name);
         int idx = traversalResult.indexOf(name);
         if (!traversalResult.isEmpty() && idx >= 0 && idx < animationIndex) {
           if (idx == 0)
-            g.setColor(Color.RED);  // 起點紅
+            g.setColor(Color.RED);
           else
-            g.setColor(Color.GREEN); // 其它綠
+            g.setColor(Color.GREEN);
         } else {
-          g.setColor(Color.RED); // 沒被搜尋到也可以用原來顏色
+          g.setColor(Color.RED);
         }
         g.fillOval(p.x - 20, p.y - 20, 40, 40);
         g.setColor(Color.WHITE);
@@ -201,25 +185,6 @@ public class GraphGUI extends JFrame {
     }
   }
 
-  // 記錄邊
-  // Edge 類覆寫 equals 與 hashCode 以利判斷重複
-  static class Edge {
-    String from, to;
-    Edge(String f, String t) { from = f; to = t; }
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) return true;
-      if (o == null || getClass() != o.getClass()) return false;
-      Edge edge = (Edge) o;
-      return Objects.equals(from, edge.from) && Objects.equals(to, edge.to);
-    }
-    @Override
-    public int hashCode() {
-      return Objects.hash(from, to);
-    }
-  }
-
-  // autoGenerateGraph 應為 GraphGUI 的成員方法
   private void autoGenerateGraph() {
     int nNodes, nEdges;
     try {
@@ -233,13 +198,9 @@ public class GraphGUI extends JFrame {
       JOptionPane.showMessageDialog(this, "At least 2 nodes and 1 edge required!", "Error", JOptionPane.ERROR_MESSAGE);
       return;
     }
-    // 清空現有節點與邊
-    nodes.clear();
-    edges.clear();
-
+    graph.clear();
     Random rand = new Random();
-    int minDist = 60; // 節點間最小距離
-    // 產生節點（自動產生時也避免重複位置且距離足夠）
+    int minDist = 60;
     for (int i = 0; i < nNodes; ++i) {
       String name = "N" + i;
       Point p;
@@ -247,16 +208,15 @@ public class GraphGUI extends JFrame {
         int x = rand.nextInt(450) + 50;
         int y = rand.nextInt(400) + 50;
         p = new Point(x, y);
-        for (Point exist : nodes.values()) {
+        for (Point exist : graph.getNodes().values()) {
           if (p.distance(exist) < minDist) continue outer;
         }
         break;
       }
-      nodes.put(name, p);
+      graph.addNode(name, p);
     }
-    // 產生隨機不重複的邊
     Set<Edge> generatedEdges = new HashSet<>();
-    java.util.List<String> names = new ArrayList<>(nodes.keySet());
+    java.util.List<String> names = new ArrayList<>(graph.getNodes().keySet());
     while (generatedEdges.size() < nEdges && generatedEdges.size() < nNodes * (nNodes - 1) / 2) {
       String from = names.get(rand.nextInt(names.size()));
       String to = names.get(rand.nextInt(names.size()));
@@ -267,61 +227,11 @@ public class GraphGUI extends JFrame {
         }
       }
     }
-    edges.addAll(generatedEdges);
-
+    for (Edge edge : generatedEdges) {
+      graph.addEdge(edge.from, edge.to);
+    }
     repaint();
   }
-
-  private Map<String, java.util.List<String>> getAdjacencyList() {
-    Map<String, java.util.List<String>> graph = new HashMap<>();
-    for (String name : nodes.keySet()) {
-        graph.put(name, new ArrayList<>());
-    }
-    for (Edge edge : edges) {
-        // 無向圖兩邊加
-        if(graph.containsKey(edge.from) && graph.containsKey(edge.to)) {
-            graph.get(edge.from).add(edge.to);
-            graph.get(edge.to).add(edge.from);
-        }
-    }
-    return graph;
-}
-
-  private java.util.List<String> dfs(String start, Map<String, java.util.List<String>> graph) {
-    java.util.List<String> result = new ArrayList<>();
-    Set<String> visited = new HashSet<>();
-    dfsHelper(start, graph, visited, result);
-    return result;
-}
-
-private void dfsHelper(String node, Map<String, java.util.List<String>> graph, Set<String> visited, java.util.List<String> result) {
-    if (!visited.contains(node)) {
-        visited.add(node);
-        result.add(node);
-        for (String neighbor : graph.get(node)) {
-            dfsHelper(neighbor, graph, visited, result);
-        }
-    }
-}
-
-private java.util.List<String> bfs(String start, Map<String, java.util.List<String>> graph) {
-    java.util.List<String> result = new ArrayList<>();
-    Set<String> visited = new HashSet<>();
-    Queue<String> queue = new LinkedList<>();
-    queue.add(start);
-    visited.add(start);
-    while (!queue.isEmpty()) {
-        String node = queue.poll();
-        result.add(node);
-        for (String neighbor : graph.get(node)) {
-            if (!visited.contains(neighbor)) {
-                queue.add(neighbor);
-                visited.add(neighbor);
-            }
-        }
-    }
-    return result;
-}
 
   private void startAnimation(GraphPanel panel) {
     animationIndex = 0;
