@@ -16,6 +16,8 @@ public class GraphGUI extends JFrame {
   private JTextField edgeCountField = new JTextField(3);
   private JTextField startNodeField = new JTextField(3);
   private java.util.List<String> traversalResult = new ArrayList<>();
+  private int animationIndex = 0;
+  private javax.swing.Timer animationTimer;
 
 
   public GraphGUI() {
@@ -126,7 +128,7 @@ public class GraphGUI extends JFrame {
         return;
       }
       traversalResult = dfs(start, getAdjacencyList());
-      repaint();
+      startAnimation(panel);
     });
     bfsBtn.addActionListener(e -> {
       String start = startNodeField.getText().trim();
@@ -135,7 +137,7 @@ public class GraphGUI extends JFrame {
         return;
       }
       traversalResult = bfs(start, getAdjacencyList());
-      repaint();
+      startAnimation(panel);
     });
   }
 
@@ -152,17 +154,17 @@ public class GraphGUI extends JFrame {
           g.drawLine(p1.x, p1.y, p2.x, p2.y);
         }
       }
-      // 畫節點，根據 traversalResult 著色
-      int idx = 0;
+      // 畫節點，根據 traversalResult 著色動畫
       for (String name : nodes.keySet()) {
         Point p = nodes.get(name);
-        if (!traversalResult.isEmpty() && traversalResult.contains(name)) {
-            if (traversalResult.indexOf(name) == 0)
-                g.setColor(Color.RED);  // 起點紅
-            else
-                g.setColor(Color.GREEN); // 其它綠
+        int idx = traversalResult.indexOf(name);
+        if (!traversalResult.isEmpty() && idx >= 0 && idx < animationIndex) {
+          if (idx == 0)
+            g.setColor(Color.RED);  // 起點紅
+          else
+            g.setColor(Color.GREEN); // 其它綠
         } else {
-            g.setColor(Color.RED); // 沒被搜尋到也可以用原來顏色
+          g.setColor(Color.RED); // 沒被搜尋到也可以用原來顏色
         }
         g.fillOval(p.x - 20, p.y - 20, 40, 40);
         g.setColor(Color.WHITE);
@@ -284,6 +286,23 @@ private java.util.List<String> bfs(String start, Map<String, java.util.List<Stri
     }
     return result;
 }
+
+  private void startAnimation(GraphPanel panel) {
+    animationIndex = 0;
+    if (animationTimer != null && animationTimer.isRunning()) {
+      animationTimer.stop();
+    }
+    animationTimer = new javax.swing.Timer(500, new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        animationIndex++;
+        if (animationIndex > traversalResult.size()) {
+          animationTimer.stop();
+        }
+        panel.repaint();
+      }
+    });
+    animationTimer.start();
+  }
 
   public static void main(String[] args) {
     SwingUtilities.invokeLater(() -> new GraphGUI().setVisible(true));
