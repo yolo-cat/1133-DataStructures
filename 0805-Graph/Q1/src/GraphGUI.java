@@ -21,7 +21,7 @@ public class GraphGUI extends JFrame {
   public GraphGUI() {
     setTitle("Graph Application");
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    setSize(600, 550);
+    setSize(800, 800);
 
     GraphPanel panel = new GraphPanel();
     add(panel, BorderLayout.CENTER);
