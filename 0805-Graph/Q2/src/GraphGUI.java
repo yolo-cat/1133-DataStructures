@@ -75,21 +75,21 @@ public class GraphGUI extends JFrame {
     controlPanel.setLayout(new BoxLayout(controlPanel, BoxLayout.Y_AXIS));
     controlPanel.setPreferredSize(new Dimension(280, 0));
 
-    // 節點操作區域
-    controlPanel.add(createNodeSection());
-    controlPanel.add(Box.createVerticalStrut(10));
+    // 節點操作區域 (隱藏)
+//    controlPanel.add(createNodeSection());
+//    controlPanel.add(Box.createVerticalStrut(10));
 
-    // 邊操作區域
-    controlPanel.add(createEdgeSection());
-    controlPanel.add(Box.createVerticalStrut(10));
+    // 邊操作區域 (隱藏)
+//    controlPanel.add(createEdgeSection());
+//    controlPanel.add(Box.createVerticalStrut(10));
 
     // 自動生成區域
     controlPanel.add(createAutoGenSection());
     controlPanel.add(Box.createVerticalStrut(10));
 
-    // 遍歷區域
-    controlPanel.add(createTraversalSection());
-    controlPanel.add(Box.createVerticalStrut(10));
+    // // 遍歷區域 (隱藏)
+    // controlPanel.add(createTraversalSection());
+    // controlPanel.add(Box.createVerticalStrut(10));
 
     // MST和最短路徑區域
     controlPanel.add(createAlgorithmSection());
