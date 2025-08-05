@@ -38,20 +38,9 @@ public class GraphGUI extends JFrame {
     addNodeBtn.addActionListener(e -> {
       String name = nodeNameField.getText().trim();
       if (!name.isEmpty() && !graph.containsNode(name)) {
-        Point p;
-        Random rand = new Random();
-        int minDist = 60;
-        outer: while (true) {
-          int x = rand.nextInt(1000) + 100;
-          int y = rand.nextInt(400) + 100;
-          p = new Point(x, y);
-          for (Point exist : graph.getNodes().values()) {
-            if (p.distance(exist) < minDist) continue outer;
-          }
-          break;
-        }
-        graph.addNode(name, p);
+        graph.addNode(name, new Point(0, 0));
         nodeNameField.setText("");
+        arrangeNodesAsPentagon();
         panel.repaint();
       }
     });
@@ -104,7 +93,11 @@ public class GraphGUI extends JFrame {
     controlPanel.add(edgeCountField, gbc);
 
     JButton autoGenBtn = new JButton("Auto Generate Graph");
-    autoGenBtn.addActionListener(e -> autoGenerateGraph());
+    autoGenBtn.addActionListener(e -> {
+      autoGenerateGraph();
+      arrangeNodesAsPentagon();
+      panel.repaint();
+    });
     gbc.gridx = 4;
     controlPanel.add(autoGenBtn, gbc);
 
@@ -254,6 +247,19 @@ public class GraphGUI extends JFrame {
       }
     });
     animationTimer.start();
+  }
+
+  private void arrangeNodesAsPentagon() {
+    int n = graph.getNodes().size();
+    if (n == 0) return;
+    int centerX = 700, centerY = 300, radius = 200;
+    java.util.List<String> names = new ArrayList<>(graph.getNodes().keySet());
+    for (int i = 0; i < n; i++) {
+      double angle = 2 * Math.PI * i / n - Math.PI / 2;
+      int x = centerX + (int)(radius * Math.cos(angle));
+      int y = centerY + (int)(radius * Math.sin(angle));
+      graph.getNodes().put(names.get(i), new Point(x, y));
+    }
   }
 
   public static void main(String[] args) {
