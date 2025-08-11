@@ -12,7 +12,9 @@
       <module fileurl="file://$PROJECT_DIR$/0729-Tree/0729-HeapApplication/0729-HeapApplication.iml" filepath="$PROJECT_DIR$/0729-Tree/0729-HeapApplication/0729-HeapApplication.iml" />
       <module fileurl="file://$PROJECT_DIR$/0729-Tree/0729-Tree.iml" filepath="$PROJECT_DIR$/0729-Tree/0729-Tree.iml" />
       <module fileurl="file://$PROJECT_DIR$/0805-Graph/0805-Graph.iml" filepath="$PROJECT_DIR$/0805-Graph/0805-Graph.iml" />
+      <module fileurl="file://$PROJECT_DIR$/0811-Graph/0811-Graph.iml" filepath="$PROJECT_DIR$/0811-Graph/0811-Graph.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/1133-DataStructures.iml" filepath="$PROJECT_DIR$/.idea/1133-DataStructures.iml" />
+      <module fileurl="file://$PROJECT_DIR$/0811-Graph/ArticulationPoints/ArticulationPoints.iml" filepath="$PROJECT_DIR$/0811-Graph/ArticulationPoints/ArticulationPoints.iml" />
       <module fileurl="file://$PROJECT_DIR$/0805-Graph/Q1/Q1.iml" filepath="$PROJECT_DIR$/0805-Graph/Q1/Q1.iml" />
       <module fileurl="file://$PROJECT_DIR$/0805-Graph/Q2/Q2.iml" filepath="$PROJECT_DIR$/0805-Graph/Q2/Q2.iml" />
     </modules>
