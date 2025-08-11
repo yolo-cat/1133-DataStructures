@@ -27,10 +27,13 @@
             System.out.println("Tarjan Articulation Points: " + tarjan.findArticulationPoints());
 
             // 效能比較
-            int[] sizes = {2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15, 20, 30, 50, 100};
-            for (int v : sizes) {
-                int e = Math.min(v * (v-1) / 4, v*10); // 控制邊數不超過完全圖
-                runBenchmark(v, e);
+            for (int v = 1; v <= 100; v++) {
+                int maxEdge = v * (v - 1) / 2;
+                int[] edgeCases = {Math.max(v - 1, 0), v, maxEdge};
+                for (int e : edgeCases) {
+                    if (e > maxEdge) continue; // 避免超過最大邊數
+                    runBenchmark(v, e);
+                }
             }
         }
 
@@ -42,7 +45,16 @@
                 BruteForceArticulationPoints brute = new BruteForceArticulationPoints(V);
                 TarjanArticulationPoints tarjan = new TarjanArticulationPoints(V);
                 Set<String> edgeSet = new HashSet<>();
-                // 隨機產生無重複邊
+                // 先產生一棵連通生成樹（v-1條邊）
+                for (int i = 1; i < V; i++) {
+                    int u = i;
+                    int v = rand.nextInt(i); // 連接到前面任一頂點
+                    String key = u < v ? u + "," + v : v + "," + u;
+                    brute.addEdge(u, v);
+                    tarjan.addEdge(u, v);
+                    edgeSet.add(key);
+                }
+                // 若 E > V-1，隨機補邊
                 while (edgeSet.size() < E) {
                     int u = rand.nextInt(V);
                     int v = rand.nextInt(V);
@@ -95,6 +107,7 @@
         }
 
         public Set<Integer> findArticulationPoints() {
+            if (V <= 1) return new HashSet<>(); // 單一頂點無關節點
             Set<Integer> result = new HashSet<>();
             for (int i = 0; i < V; i++) {
                 boolean[] visited = new boolean[V];
