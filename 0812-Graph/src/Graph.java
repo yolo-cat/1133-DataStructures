@@ -37,8 +37,69 @@ public class Graph {
         }
     }
 
+    public void addEdge(String from, String to, int cost) {
+        Edge edge = new Edge(from, to, cost);
+        if (!edges.contains(edge)) {
+            edges.add(edge);
+        }
+    }
+
     public boolean containsNode(String name) {
         return nodes.containsKey(name);
+    }
+
+    public int[][] getAdjacencyMatrix() {
+        List<String> nodeNames = new ArrayList<>(nodes.keySet());
+        Collections.sort(nodeNames); // 排序確保矩陣順序一致
+        int n = nodeNames.size();
+        int[][] matrix = new int[n][n];
+
+        // 初始化矩陣
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                matrix[i][j] = 0;
+            }
+        }
+
+        // 填入邊的權重
+        for (Edge edge : edges) {
+            int fromIndex = nodeNames.indexOf(edge.from);
+            int toIndex = nodeNames.indexOf(edge.to);
+            if (fromIndex >= 0 && toIndex >= 0) {
+                matrix[fromIndex][toIndex] = edge.cost;
+                matrix[toIndex][fromIndex] = edge.cost; // 無向圖
+            }
+        }
+
+        return matrix;
+    }
+
+    public String getAdjacencyMatrixString() {
+        if (nodes.isEmpty()) return "No nodes in graph";
+
+        List<String> nodeNames = new ArrayList<>(nodes.keySet());
+        Collections.sort(nodeNames);
+        int[][] matrix = getAdjacencyMatrix();
+
+        StringBuilder sb = new StringBuilder();
+
+        // 標題行
+        sb.append("    ");
+        for (String name : nodeNames) {
+            sb.append(String.format("%4s", name));
+        }
+        sb.append("\n");
+
+        // 矩陣行
+        for (int i = 0; i < nodeNames.size(); i++) {
+            sb.append(String.format("%4s", nodeNames.get(i)));
+            for (int j = 0; j < nodeNames.size(); j++) {
+                sb.append(String.format("%4d", matrix[i][j]));
+            }
+            sb.append("\n");
+        }
+
+        return sb.toString();
     }
 
     public Map<String, List<String>> getAdjacencyList() {

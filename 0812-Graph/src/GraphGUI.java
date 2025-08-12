@@ -97,6 +97,10 @@ public class GraphGUI extends JFrame {
 
     // 輸出區域
     controlPanel.add(createOutputSection());
+    controlPanel.add(Box.createVerticalStrut(10));
+
+    // 相鄰矩陣區域
+    controlPanel.add(createMatrixSection());
 
     return controlPanel;
   }
@@ -338,11 +342,39 @@ public class GraphGUI extends JFrame {
   }
 
   private JTextArea outputArea;
+  private JTextArea matrixArea; // 新增矩陣顯示區域
 
   private void updateOutputArea(String text) {
     if (outputArea != null) {
       outputArea.setText(text);
     }
+  }
+
+  private void updateMatrixArea() {
+    if (matrixArea != null) {
+      matrixArea.setText(graph.getAdjacencyMatrixString());
+    }
+  }
+
+  private JPanel createMatrixSection() {
+    JPanel panel = createSectionPanel("Adjacency Matrix");
+
+    JTextArea matrixArea = new JTextArea(8, 20);
+    matrixArea.setEditable(false);
+    matrixArea.setLineWrap(true);
+    matrixArea.setWrapStyleWord(true);
+    matrixArea.setBackground(WIN31_WHITE);
+    matrixArea.setForeground(WIN31_BLACK);
+    matrixArea.setFont(new Font("Courier New", Font.PLAIN, 11));
+    matrixArea.setBorder(new BevelBorder(BevelBorder.LOWERED));
+
+    JScrollPane scrollPane = new JScrollPane(matrixArea);
+    scrollPane.setBorder(new BevelBorder(BevelBorder.LOWERED));
+    panel.add(scrollPane);
+
+    this.matrixArea = matrixArea; // 儲存引用
+
+    return panel;
   }
 
   private JPanel createSectionPanel(String title) {
@@ -553,6 +585,8 @@ public class GraphGUI extends JFrame {
       graph.addNode(name, new Point(0, 0));
     }
 
+    arrangeNodesAsPentagon(); // 先安排座標
+
     // 生成邊
     Set<Edge> generatedEdges = new HashSet<>();
     java.util.List<String> names = new ArrayList<>(graph.getNodes().keySet());
@@ -568,8 +602,16 @@ public class GraphGUI extends JFrame {
       }
     }
     for (Edge edge : generatedEdges) {
-      graph.addEdge(edge.from, edge.to);
+      Point p1 = graph.getNodes().get(edge.from);
+      Point p2 = graph.getNodes().get(edge.to);
+      int dx = p1.x - p2.x;
+      int dy = p1.y - p2.y;
+      int cost = (int)Math.round(Math.sqrt(dx * dx + dy * dy));
+      graph.addEdge(edge.from, edge.to, cost);
     }
+
+    // 更新相鄰矩陣顯示
+    updateMatrixArea();
   }
 
   public static void main(String[] args) {
