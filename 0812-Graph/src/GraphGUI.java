@@ -552,14 +552,22 @@ public class GraphGUI extends JFrame {
   }
 
   private void arrangeNodesAsPentagon() {
+    // 改為格狀分佈
     int n = graph.getNodes().size();
     if (n == 0) return;
-    int centerX = 400, centerY = 300, radius = 180;
+    int panelWidth = 800, panelHeight = 600;
+    int margin = 60;
+    int gridCols = (int)Math.ceil(Math.sqrt(n));
+    int gridRows = (int)Math.ceil((double)n / gridCols);
+    int cellWidth = (panelWidth - 2 * margin) / Math.max(1, gridCols - 1);
+    int cellHeight = (panelHeight - 2 * margin) / Math.max(1, gridRows - 1);
     java.util.List<String> names = new ArrayList<>(graph.getNodes().keySet());
+    Collections.sort(names);
     for (int i = 0; i < n; i++) {
-      double angle = 2 * Math.PI * i / n - Math.PI / 2;
-      int x = centerX + (int)(radius * Math.cos(angle));
-      int y = centerY + (int)(radius * Math.sin(angle));
+      int row = i / gridCols;
+      int col = i % gridCols;
+      int x = margin + col * cellWidth;
+      int y = margin + row * cellHeight;
       graph.getNodes().put(names.get(i), new Point(x, y));
     }
   }
