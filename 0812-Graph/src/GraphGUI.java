@@ -30,6 +30,8 @@ public class GraphGUI extends JFrame {
   private java.util.List<Edge> highlightEdges = new ArrayList<>();
   private String highlightType = ""; // "MST" or "PATH"
 
+  private boolean showFloydMatrix = true; // 預設只顯示 Floyd Matrix
+
   public GraphGUI() {
     setTitle("Graph Application - Windows 3.1 Style");
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -258,6 +260,12 @@ public class GraphGUI extends JFrame {
     return panel;
   }
 
+  private String[] getSortedNodeNames() {
+    java.util.List<String> nodeNames = new java.util.ArrayList<>(graph.getNodes().keySet());
+    java.util.Collections.sort(nodeNames);
+    return nodeNames.toArray(new String[0]);
+  }
+
   private JPanel createAlgorithmSection() {
     JPanel panel = createSectionPanel("Algorithms");
 
@@ -317,6 +325,73 @@ public class GraphGUI extends JFrame {
     pathButtonPanel.add(pathBtn);
     panel.add(pathButtonPanel);
 
+//    // 新增查詢任意兩點最短距離按鈕
+//    JButton queryBtn = createWin31Button("查詢任意兩點最短距離");
+//    queryBtn.addActionListener(e -> {
+//      String[] nodeNames = getSortedNodeNames();
+//      if (nodeNames.length < 2) {
+//        showWin31MessageDialog("節點數不足！", "Error");
+//        return;
+//      }
+//      JPanel inputPanel = new JPanel(new GridLayout(2, 2, 5, 5));
+//      inputPanel.add(new JLabel("起點名稱:"));
+//      JComboBox<String> fromBox = new JComboBox<>(nodeNames);
+//      inputPanel.add(fromBox);
+//      inputPanel.add(new JLabel("終點名稱:"));
+//      JComboBox<String> toBox = new JComboBox<>(nodeNames);
+//      inputPanel.add(toBox);
+//      int result = JOptionPane.showConfirmDialog(this, inputPanel, "查詢最短距離", JOptionPane.OK_CANCEL_OPTION);
+//      if (result == JOptionPane.OK_OPTION) {
+//        String from = (String) fromBox.getSelectedItem();
+//        String to = (String) toBox.getSelectedItem();
+//        int[][] dist = graph.getFloydWarshallMatrix();
+//        int fromIdx = Arrays.asList(nodeNames).indexOf(from);
+//        int toIdx = Arrays.asList(nodeNames).indexOf(to);
+//        int d = dist[fromIdx][toIdx];
+//        if (d >= 1000000000) {
+//          showWin31MessageDialog("無法由 " + from + " 到達 " + to, "查詢結果");
+//        } else {
+//          showWin31MessageDialog(from + " 到 " + to + " 的最短距離為：" + d, "查詢結果");
+//        }
+//      }
+//    });
+//    panel.add(queryBtn);
+
+    // 新增列出所有頂點距離矩陣按鈕
+    JButton matrixBtn = createWin31Button("列出所有頂點距離矩陣");
+    matrixBtn.addActionListener(e -> {
+      if (graph.getNodes().isEmpty()) {
+        updateOutputArea("圖形為空，無法計算距離矩陣");
+        return;
+      }
+      String[] nodeNames = getSortedNodeNames();
+      int[][] dist = graph.getFloydWarshallMatrix();
+      StringBuilder output = new StringBuilder();
+      output.append("Floyd 最短路徑距離矩陣 (所有頂點對距離):\n");
+      output.append("節點數量: ").append(nodeNames.length).append("\n");
+      output.append("=========================================\n\n");
+
+      int pairCount = 0;
+      for (int i = 0; i < nodeNames.length; i++) {
+        for (int j = 0; j < nodeNames.length; j++) {
+          if (i != j) { // 排除自己到自己的距離
+            pairCount++;
+            String from = nodeNames[i];
+            String to = nodeNames[j];
+            if (dist[i][j] >= 1000000000) {
+              output.append(String.format("%s -> %s：無法到達\n", from, to));
+            } else {
+              output.append(String.format("%s -> %s：%d\n", from, to, dist[i][j]));
+            }
+          }
+        }
+      }
+      output.append("\n=========================================");
+      output.append(String.format("\n共有 %d 個頂點對的最短路徑", pairCount));
+      updateOutputArea(output.toString());
+    });
+    panel.add(matrixBtn);
+
     return panel;
   }
 
@@ -352,12 +427,12 @@ public class GraphGUI extends JFrame {
 
   private void updateMatrixArea() {
     if (matrixArea != null) {
-      matrixArea.setText(graph.getAdjacencyMatrixString());
+      matrixArea.setText(graph.getFloydWarshallMatrixString());
     }
   }
 
   private JPanel createMatrixSection() {
-    JPanel panel = createSectionPanel("Adjacency Matrix");
+    JPanel panel = createSectionPanel("Floyd Matrix");
 
     JTextArea matrixArea = new JTextArea(8, 20);
     matrixArea.setEditable(false);
@@ -372,8 +447,9 @@ public class GraphGUI extends JFrame {
     scrollPane.setBorder(new BevelBorder(BevelBorder.LOWERED));
     panel.add(scrollPane);
 
-    this.matrixArea = matrixArea; // 儲存引用
-
+    // 只顯示 Floyd Matrix，不顯示切換按鈕
+    this.matrixArea = matrixArea;
+    updateMatrixArea();
     return panel;
   }
 

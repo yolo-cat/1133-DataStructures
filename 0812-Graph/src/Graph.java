@@ -226,4 +226,97 @@ public class Graph {
         if (!from.equals(to) && path.isEmpty()) return null; // 無路徑
         return path;
     }
+
+    // Floyd-Warshall Algorithm: 回傳所有點對點最短距離矩陣
+    public int[][] getFloydWarshallMatrix() {
+        List<String> nodeNames = new ArrayList<>(nodes.keySet());
+        Collections.sort(nodeNames);
+        int n = nodeNames.size();
+        int[][] dist = new int[n][n];
+        final int INF = 1000000000;
+        // 初始化
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                if (i == j) dist[i][j] = 0;
+                else dist[i][j] = INF;
+            }
+        }
+        for (Edge edge : edges) {
+            int u = nodeNames.indexOf(edge.from);
+            int v = nodeNames.indexOf(edge.to);
+            if (u >= 0 && v >= 0) {
+                dist[u][v] = Math.min(dist[u][v], edge.cost);
+                dist[v][u] = Math.min(dist[v][u], edge.cost); // 無向圖
+            }
+        }
+        // Floyd-Warshall 主迴圈
+        for (int k = 0; k < n; k++) {
+            for (int i = 0; i < n; i++) {
+                for (int j = 0; j < n; j++) {
+                    if (dist[i][k] < INF && dist[k][j] < INF) {
+                        dist[i][j] = Math.min(dist[i][j], dist[i][k] + dist[k][j]);
+                    }
+                }
+            }
+        }
+        return dist;
+    }
+
+    // 輔助：回傳 Floyd-Warshall 結果字串
+    public String getFloydWarshallMatrixString() {
+        if (nodes.isEmpty()) return "No nodes in graph";
+        List<String> nodeNames = new ArrayList<>(nodes.keySet());
+        Collections.sort(nodeNames);
+        int[][] dist = getFloydWarshallMatrix();
+        StringBuilder sb = new StringBuilder();
+
+        // 標題
+        sb.append("Floyd-Warshall 最短路徑矩陣\n");
+        sb.append("========================================\n");
+        sb.append("節點數量: ").append(nodeNames.size()).append("\n");
+        sb.append("========================================\n\n");
+
+        // 條列式顯示所有頂點對的最短距離
+        int pairCount = 0;
+        for (int i = 0; i < nodeNames.size(); i++) {
+            for (int j = 0; j < nodeNames.size(); j++) {
+                if (i != j) { // 排除自己到自己的距離
+                    pairCount++;
+                    String from = nodeNames.get(i);
+                    String to = nodeNames.get(j);
+                    if (dist[i][j] >= 1000000000) {
+                        sb.append(String.format("%s -> %s：無法到達\n", from, to));
+                    } else {
+                        sb.append(String.format("%s -> %s：%d\n", from, to, dist[i][j]));
+                    }
+                }
+            }
+        }
+
+        sb.append("\n========================================");
+        sb.append(String.format("\n共有 %d 個頂點對的最短路徑", pairCount));
+        sb.append("\n說明: 列表顯示所有頂點對之間的最短距離");
+        sb.append("\n      「無法到達」表示兩點間沒有連通路徑");
+
+        return sb.toString();
+    }
+
+    // 輔助：回傳 Floyd-Warshall 結果字串（僅矩陣，不含標題）
+    public String getFloydWarshallMatrixOnlyString() {
+        if (nodes.isEmpty()) return "No nodes in graph";
+        List<String> nodeNames = new ArrayList<>(nodes.keySet());
+        Collections.sort(nodeNames);
+        int[][] dist = getFloydWarshallMatrix();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < nodeNames.size(); i++) {
+            for (int j = 0; j < nodeNames.size(); j++) {
+                if (dist[i][j] >= 1000000000)
+                    sb.append("INF ");
+                else
+                    sb.append(String.format("%3d ", dist[i][j]));
+            }
+            sb.append("\n");
+        }
+        return sb.toString();
+    }
 }
