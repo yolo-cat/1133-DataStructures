@@ -166,8 +166,8 @@ public class SearchGUIV2 {
       }
 
       // --- 圖例 ---
-      int legendX = axisX1 + 20;
-      int legendY = chartAreaY + 10;
+      int legendX = axisX1 + 100;
+      int legendY = chartAreaY + 100;
       g2.setColor(new Color(255, 255, 255, 200));
       g2.fillRoundRect(legendX - 10, legendY - 10, 140, 60, 10, 10);
       g2.setFont(FONT_SMALL);
